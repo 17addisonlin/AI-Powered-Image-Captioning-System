@@ -1,4 +1,4 @@
-from transformers import BlipProcessor, BlipForConditionalGeneration
+from transformers import GitProcessor, GitForCausalLM
 from PIL import Image
 import torch
 
@@ -10,9 +10,9 @@ class ImageCaptioner:
         
         self.device = device
         
-        # Initialize BLIP model and processor
-        self.processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
-        self.model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base").to(self.device)
+        # Initialize GIT model and processor
+        self.processor = GitProcessor.from_pretrained("microsoft/git-base-coco")
+        self.model = GitForCausalLM.from_pretrained("microsoft/git-base-coco").to(self.device)
 
     def caption(self, image: Image.Image, max_new_tokens: int = 30) -> str:
         # Process the image into the format expected by the model
@@ -23,5 +23,5 @@ class ImageCaptioner:
             output_ids = self.model.generate(**inputs, max_new_tokens=max_new_tokens)
 
         # Decode and return the generated caption
-        caption = self.processor.decode(output_ids[0], skip_special_tokens=True)
+        caption = self.processor.batch_decode(output_ids, skip_special_tokens=True)[0]
         return caption
