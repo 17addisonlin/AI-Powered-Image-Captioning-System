@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image Captioning</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { width: 80%; max-width: 600px; margin: auto; text-align: center; }
+        input[type="file"] { margin-top: 20px; }
+        #caption { margin-top: 20px; font-weight: bold; color: green; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Upload an image for captioning</h1>
+    <form id="upload-form" enctype="multipart/form-data">
+        <input type="file" id="image-file" name="file" accept="image/*" required>
+        <br><br>
+        <button type="submit">Generate Caption</button>
+    </form>
+
+    <div id="caption"></div>
+</div>
+
+<script>
+    document.getElementById("upload-form").onsubmit = async function(event) {
+        event.preventDefault();
+
+        const fileInput = document.getElementById("image-file");
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+
+        const response = await fetch("/caption/", {
+            method: "POST",
+            body: formData
+        });
+
+        const result = await response.json();
+        document.getElementById("caption").innerHTML = "Caption: " + result.caption;
+    };
+</script>
+
+</body>
+</html>
