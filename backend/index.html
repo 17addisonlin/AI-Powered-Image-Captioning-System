@@ -5,40 +5,465 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Image Captioning</title>
     <style>
-        body { font-family: Arial, sans-serif; }
-        .container { width: 80%; max-width: 600px; margin: auto; text-align: center; }
-        input[type="file"] { margin-top: 20px; }
-        #caption { margin-top: 20px; font-weight: bold; color: green; }
+        :root {
+            --bg-1: #0a0f1f;
+            --bg-2: #0f1b2d;
+            --ink: #e9f0ff;
+            --muted: #91a3c2;
+            --accent: #4fe3ff;
+            --accent-2: #7cf9b9;
+            --card: rgba(12, 20, 38, 0.82);
+            --shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
+            --soft-border: rgba(120, 150, 200, 0.18);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--ink);
+            font-family: "Futura", "Trebuchet MS", "Segoe UI", sans-serif;
+            background: radial-gradient(40% 40% at 10% 10%, rgba(79, 227, 255, 0.12) 0%, transparent 60%),
+                        radial-gradient(40% 40% at 90% 15%, rgba(124, 249, 185, 0.12) 0%, transparent 60%),
+                        linear-gradient(140deg, var(--bg-1), var(--bg-2));
+            display: grid;
+            place-items: center;
+            padding: 32px 16px;
+        }
+
+        .frame {
+            position: relative;
+            width: min(860px, 100%);
+            padding: 36px;
+            border-radius: 28px;
+            background: var(--card);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+            animation: rise 700ms ease-out;
+            border: 1px solid var(--soft-border);
+        }
+
+        .frame::before,
+        .frame::after {
+            content: "";
+            position: absolute;
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            filter: blur(0.5px);
+            opacity: 0.35;
+            pointer-events: none;
+        }
+
+        .frame::before {
+            top: -80px;
+            right: -60px;
+            background: radial-gradient(circle at 30% 30%, rgba(79, 227, 255, 0.55), transparent 70%);
+        }
+
+        .frame::after {
+            bottom: -90px;
+            left: -80px;
+            background: radial-gradient(circle at 30% 30%, rgba(124, 249, 185, 0.55), transparent 70%);
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .frame > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .brand {
+            font-family: "Futura", "Trebuchet MS", "Segoe UI", sans-serif;
+            font-size: clamp(26px, 3.6vw, 38px);
+            letter-spacing: 0.8px;
+            margin: 0;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            margin: 8px 0 0;
+            max-width: 520px;
+            font-size: 16px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+            margin-top: 28px;
+        }
+
+        .panel {
+            padding: 20px;
+            border-radius: 18px;
+            background: rgba(9, 15, 30, 0.75);
+            border: 1px solid var(--soft-border);
+        }
+
+        .toggle-group {
+            display: inline-flex;
+            gap: 8px;
+            padding: 6px;
+            border-radius: 999px;
+            background: rgba(10, 18, 36, 0.85);
+            border: 1px solid var(--soft-border);
+        }
+
+        .toggle-btn {
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            font-size: 11px;
+        }
+
+        .toggle-btn.active {
+            background: linear-gradient(120deg, rgba(79, 227, 255, 0.9), rgba(124, 249, 185, 0.9));
+            color: #0a0f1f;
+            box-shadow: 0 10px 20px rgba(79, 227, 255, 0.25);
+        }
+
+        .drop {
+            border: 2px dashed rgba(79, 227, 255, 0.35);
+            border-radius: 20px;
+            padding: 24px;
+            text-align: center;
+            background: rgba(12, 22, 40, 0.75);
+            transition: border-color 200ms ease, transform 200ms ease, box-shadow 200ms ease;
+        }
+
+        .drop.dragover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 14px 30px rgba(79, 227, 255, 0.2);
+        }
+
+        .file-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            border-radius: 999px;
+            background: linear-gradient(120deg, rgba(79, 227, 255, 0.9), rgba(124, 249, 185, 0.9));
+            color: #0a0f1f;
+            cursor: pointer;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-size: 12px;
+            box-shadow: 0 10px 20px rgba(79, 227, 255, 0.25);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-hint {
+            margin-top: 14px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .preview {
+            margin-top: 18px;
+            border-radius: 12px;
+            max-height: 240px;
+            width: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .actions {
+            margin-top: 16px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .options {
+            margin-top: 14px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+        }
+
+        .option-card {
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid var(--soft-border);
+            background: rgba(10, 18, 36, 0.9);
+        }
+
+        .option-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .pill-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pill-toggle input {
+            accent-color: #4fe3ff;
+        }
+
+        select {
+            width: 100%;
+            background: rgba(9, 15, 30, 0.9);
+            color: var(--ink);
+            border: 1px solid var(--soft-border);
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        button {
+            border: none;
+            background: linear-gradient(120deg, rgba(79, 227, 255, 0.9), rgba(124, 249, 185, 0.9));
+            color: #0a0f1f;
+            padding: 12px 18px;
+            border-radius: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 150ms ease, box-shadow 150ms ease;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(79, 227, 255, 0.25);
+        }
+
+        .result-title {
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            margin: 0 0 10px;
+        }
+
+        #caption {
+            font-size: 18px;
+            line-height: 1.5;
+            color: var(--ink);
+            min-height: 72px;
+        }
+
+        .status {
+            color: var(--muted);
+            font-size: 14px;
+            margin-top: 10px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(10, 18, 36, 0.9);
+            border: 1px solid var(--soft-border);
+        }
+
+        @keyframes rise {
+            from { transform: translateY(12px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @media (max-width: 760px) {
+            .frame { padding: 24px; }
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Upload an image for captioning</h1>
-    <form id="upload-form" enctype="multipart/form-data">
-        <input type="file" id="image-file" name="file" accept="image/*" required>
-        <br><br>
-        <button type="submit">Generate Caption</button>
-    </form>
+<main class="frame">
+    <header>
+        <div>
+            <h1 class="brand">Image Caption Studio</h1>
+            <p class="subtitle">Drop an image and let the model describe what it sees. Built for quick, clean captions you can refine.</p>
+        </div>
+        <div class="toggle-group" role="tablist">
+            <button class="toggle-btn active" type="button" data-mode="describe">Caption</button>
+            <button class="toggle-btn" type="button" data-mode="social">Social</button>
+        </div>
+    </header>
 
-    <div id="caption"></div>
-</div>
+    <div class="grid">
+        <section class="panel">
+            <form id="upload-form" enctype="multipart/form-data">
+                <div class="drop" id="drop-zone">
+                    <label class="file-label" for="image-file">Choose Image</label>
+                    <input type="file" id="image-file" name="file" accept="image/*" required>
+                    <div class="file-hint" id="file-name">JPG, PNG, or WEBP • up to 10MB</div>
+                    <img class="preview" id="preview" alt="Selected image preview">
+                </div>
+                <div class="options" id="social-options" style="display: none;">
+                    <div class="option-card">
+                        <span class="option-label">Hashtags</span>
+                        <label class="pill-toggle">
+                            <input type="checkbox" id="hashtags" checked>
+                            Include hashtags
+                        </label>
+                    </div>
+                    <div class="option-card">
+                        <span class="option-label">Emojis</span>
+                        <label class="pill-toggle">
+                            <input type="checkbox" id="emojis" checked>
+                            Include emojis
+                        </label>
+                    </div>
+                    <div class="option-card">
+                        <span class="option-label">Tone</span>
+                        <select id="tone">
+                            <option value="friendly" selected>Friendly</option>
+                            <option value="playful">Playful</option>
+                            <option value="professional">Professional</option>
+                            <option value="romantic">Romantic</option>
+                            <option value="minimal">Minimal</option>
+                            <option value="inspiring">Inspiring</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="actions">
+                    <button type="submit" id="submit-button">Generate Caption</button>
+                    <div class="status" id="status">Ready</div>
+                </div>
+            </form>
+        </section>
+
+        <section class="panel">
+            <div class="result-title">Caption</div>
+            <div id="caption">Upload an image to get a description.</div>
+        </section>
+    </div>
+</main>
 
 <script>
-    document.getElementById("upload-form").onsubmit = async function(event) {
-        event.preventDefault();
+    const form = document.getElementById("upload-form");
+    const fileInput = document.getElementById("image-file");
+    const captionEl = document.getElementById("caption");
+    const fileNameEl = document.getElementById("file-name");
+    const previewEl = document.getElementById("preview");
+    const statusEl = document.getElementById("status");
+    const submitButton = document.getElementById("submit-button");
+    const dropZone = document.getElementById("drop-zone");
+    const modeButtons = document.querySelectorAll(".toggle-btn");
+    const socialOptions = document.getElementById("social-options");
+    const hashtagsToggle = document.getElementById("hashtags");
+    const emojisToggle = document.getElementById("emojis");
+    const toneSelect = document.getElementById("tone");
 
-        const fileInput = document.getElementById("image-file");
-        const formData = new FormData();
-        formData.append("file", fileInput.files[0]);
+    let mode = "describe";
 
-        const response = await fetch("/caption/", {
-            method: "POST",
-            body: formData
+    modeButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+            modeButtons.forEach((btn) => btn.classList.remove("active"));
+            button.classList.add("active");
+            mode = button.dataset.mode;
+            socialOptions.style.display = mode === "social" ? "grid" : "none";
+            submitButton.textContent = mode === "social" ? "Generate Social Caption" : "Generate Caption";
+            captionEl.textContent = mode === "social"
+                ? "Upload an image to get a social caption."
+                : "Upload an image to get a description.";
         });
+    });
 
-        const result = await response.json();
-        document.getElementById("caption").innerHTML = "Caption: " + result.caption;
+    const updatePreview = (file) => {
+        if (!file) {
+            previewEl.style.display = "none";
+            previewEl.src = "";
+            fileNameEl.textContent = "JPG, PNG, or WEBP • up to 10MB";
+            return;
+        }
+        fileNameEl.textContent = file.name;
+        const reader = new FileReader();
+        reader.onload = () => {
+            previewEl.src = reader.result;
+            previewEl.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+    };
+
+    fileInput.addEventListener("change", () => {
+        updatePreview(fileInput.files[0]);
+    });
+
+    ["dragenter", "dragover"].forEach((eventName) => {
+        dropZone.addEventListener(eventName, (event) => {
+            event.preventDefault();
+            dropZone.classList.add("dragover");
+        });
+    });
+
+    ["dragleave", "drop"].forEach((eventName) => {
+        dropZone.addEventListener(eventName, (event) => {
+            event.preventDefault();
+            dropZone.classList.remove("dragover");
+        });
+    });
+
+    dropZone.addEventListener("drop", (event) => {
+        const file = event.dataTransfer.files[0];
+        if (file) {
+            fileInput.files = event.dataTransfer.files;
+            updatePreview(file);
+        }
+    });
+
+    form.onsubmit = async function(event) {
+        event.preventDefault();
+        const file = fileInput.files[0];
+        if (!file) return;
+
+        submitButton.disabled = true;
+        statusEl.textContent = mode === "social" ? "Writing..." : "Captioning...";
+        captionEl.textContent = "Thinking...";
+
+        const formData = new FormData();
+        formData.append("file", file);
+        if (mode === "social") {
+            formData.append("hashtags", String(hashtagsToggle.checked));
+            formData.append("emojis", String(emojisToggle.checked));
+            formData.append("tone", toneSelect.value);
+        }
+
+        try {
+            const endpoint = mode === "social" ? "/social-caption/" : "/caption/";
+            const response = await fetch(endpoint, {
+                method: "POST",
+                body: formData
+            });
+            const result = await response.json();
+            captionEl.textContent = result.caption || "No caption returned.";
+            statusEl.textContent = "Done";
+        } catch (error) {
+            captionEl.textContent = "Something went wrong. Try another image.";
+            statusEl.textContent = "Error";
+        } finally {
+            submitButton.disabled = false;
+        }
     };
 </script>
 
