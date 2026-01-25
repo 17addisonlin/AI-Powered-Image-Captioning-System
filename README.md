@@ -1,33 +1,38 @@
+# AI Image (VisionScribe) Captioning System
 <a id="readme-top"></a>
 
-[![Contributors](https://img.shields.io/github/contributors/17addisonlin/AI-Powered-Image-Captioning-System.svg?style=for-the-badge)](https://github.com/17addisonlin/AI-Powered-Image-Captioning-System/graphs/contributors)
-[![Forks](https://img.shields.io/github/forks/17addisonlin/AI-Powered-Image-Captioning-System.svg?style=for-the-badge)](https://github.com/17addisonlin/AI-Powered-Image-Captioning-System/network/members)
-[![Stargazers](https://img.shields.io/github/stars/17addisonlin/AI-Powered-Image-Captioning-System.svg?style=for-the-badge)](https://github.com/17addisonlin/AI-Powered-Image-Captioning-System/stargazers)
-[![Issues](https://img.shields.io/github/issues/17addisonlin/AI-Powered-Image-Captioning-System.svg?style=for-the-badge)](https://github.com/17addisonlin/AI-Powered-Image-Captioning-System/issues)
-[![MIT License](https://img.shields.io/github/license/17addisonlin/AI-Powered-Image-Captioning-System.svg?style=for-the-badge)](https://github.com/17addisonlin/AI-Powered-Image-Captioning-System/blob/main/LICENSE)
-[![LinkedIn](https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555)](https://www.linkedin.com/in/addison-lin-227)
+<p align="center">
+  <br>
+  <img src="image/banner.png"
+  <br>
+</p>
 
-<br />
-<div align="center">
-  <a href="https://github.com/17addisonlin/AI-Powered-Image-Captioning-System">
-    <img src="image/caption.png" alt="Logo" width="200" height="200">
-  </a>
+<h3 align="center">AI Image Captioning System</h3>
 
-  <h3 align="center">AI-Powered-Image-Captioning-System</h3>
+<p align="center">
+  A lightweight FastAPI web app that generates AI captions from uploaded images, plus a social-ready caption mode with tone, emojis, and hashtags.
+  <br>
+  <a href="https://github.com/17addisonlin/AI-Powered-Image-Captioning-System"><strong>Explore the docs »</strong></a>
+  <br>
+  English
+</p>
 
-  <p align="center">
-    Upload an image and get an AI-generated caption or a social-ready caption with tone, emojis, and hashtags.
-    <br />
-    <a href="https://github.com/17addisonlin/AI-Powered-Image-Captioning-System"><strong>Explore the docs »</strong></a>
-    <br />
-    <br />
-    <a href="https://github.com/17addisonlin/AI-Powered-Image-Captioning-System">View Demo</a>
-    &middot;
-    <a href="https://github.com/17addisonlin/AI-Powered-Image-Captioning-System/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
-    &middot;
-    <a href="https://github.com/17addisonlin/AI-Powered-Image-Captioning-System/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
-  </p>
-</div>
+<p align="center">
+  <img src="https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white">
+  <img src="https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white">
+  <img src="https://img.shields.io/badge/PyTorch-EE4C2C?logo=pytorch&logoColor=white">
+  <img src="https://img.shields.io/badge/Transformers-FFD21E?logo=huggingface&logoColor=000">
+  <img src="https://img.shields.io/badge/License-MIT-4caf50.svg">
+  <img src="https://img.shields.io/badge/PRs-welcome-55EB99.svg">
+</p>
+
+<p align="center">
+  <a href="https://github.com/17addisonlin/AI-Powered-Image-Captioning-System">View Repository</a>
+  &nbsp; | &nbsp;
+  <a href="https://github.com/17addisonlin/AI-Powered-Image-Captioning-System/issues/new?labels=bug">Report Bug</a>
+  &nbsp; | &nbsp;
+  <a href="https://github.com/17addisonlin/AI-Powered-Image-Captioning-System/issues/new?labels=enhancement">Request Feature</a>
+</p>
 
 <details>
   <summary>Table of Contents</summary>
